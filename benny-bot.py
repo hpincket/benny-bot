@@ -4,20 +4,33 @@ import re
 import json
 import os
 import time
+import random
 
 #Global Variables
 already_done = set()
-new_ids = set()
+messages = set()
+#new_ids = set()
 prog = re.compile("spaceships*[.!?]*$", re.IGNORECASE)
 prog2 = re.compile("spaceships*", re.IGNORECASE)
 
 def load_visited_set():
-    path = "/Users/harrison/Desktop/benny-bot/already-done.data"
+    path = "/home/harrison/scripts/benny-bot/already_done.data"
     if os.path.isfile(path):
         f = open(path, 'r')
         for submission_id in f:
             already_done.add(submission_id.rstrip('\n'))
         f.close()
+
+def load_messages_set():
+    path = "/home/harrison/scripts/benny-bot/messages.data"
+    if os.path.isfile(path):
+        f = open(path, 'r')
+        for submission_id in f:
+            messages.add(submission_id.rstrip('\n'))
+        f.close()
+    else:
+        print("No messages file")
+        sys.exit(1)
 
 def append_visited_set(new_ids):
     #Finally, write out the additional ids
@@ -42,10 +55,10 @@ def check_subs_comments(r,subs):
                     print("\t"+comment.body)
                     #Matches the regular expression
                     try:
-                        comment.reply("Hi! I'm Ben! But you can call me Benny! And I can build a Spaceship!")
+                        comment.reply(random.sample(messages,1)[0])
                         new_id = comment.submission.id
                         already_done.add(new_id)
-                        new_ids.add(new_id)
+                        append_visited_set([new_id])
                         result = 1
                         break;
                     except:
@@ -69,10 +82,10 @@ def check_subs_submissions(r,subs):
                     print("\t"+submission.title)
                     #Matches the regular expression
                     try:
-                        submission.add_comment("Hi! I'm Ben! But you can call me Benny! And I can build a Spaceship!")
+                        submission.add_comment(random.sample(messages, 1)[0])
                         new_id = submission.id
                         already_done.add(new_id)
-                        new_ids.add(new_id)
+                        append_visited_set([new_id])
                         result = 1
                         break;
                     except:
@@ -88,6 +101,9 @@ def main():
     username = sys.argv[1]
     password = sys.argv[2]
 
+    #Load up messages
+    print("loading messages")
+    load_messages_set()
     #Load up Past Comments
     print("loading past comments...")
     load_visited_set()
